@@ -38,6 +38,14 @@ if errorlevel 1 (
         echo [!] WARNING: Database is NOT running on port 3306!
         echo     Please start your MySQL/MariaDB server.
     )
+) else (
+    if exist "%PROJECT_ROOT%\libary\mariadb\bin\mysql.exe" (
+        "%PROJECT_ROOT%\libary\mariadb\bin\mysql.exe" -h 127.0.0.1 -P 3306 -u root -proot -e "USE swordie232;" >nul 2>&1
+        if errorlevel 1 (
+            echo [*] Database 'swordie232' not found. Auto-importing base game tables...
+            call powershell -NoProfile -ExecutionPolicy Bypass -File "%PROJECT_ROOT%\tools\import_db.ps1" -Auto
+        )
+    )
 )
 
 if "%PORTABLE_MODE%"=="1" (

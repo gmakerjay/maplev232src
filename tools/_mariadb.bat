@@ -12,6 +12,38 @@ if "%1"=="status" goto status
 if "%1"=="setup" goto setup
 goto menu
 
+:sync_ini
+set "SAFE_BASE=!MARIADB_DIR:\=/!"
+set "SAFE_DATA=!DATA_DIR:\=/!"
+(
+    echo [client]
+    echo port=3306
+    echo socket=mysql.sock
+    echo default-character-set=utf8mb4
+    echo.
+    echo [mysqld]
+    echo port=3306
+    echo bind-address=127.0.0.1
+    echo basedir=!SAFE_BASE!
+    echo datadir=!SAFE_DATA!
+    echo character-set-server=utf8mb4
+    echo collation-server=utf8mb4_unicode_ci
+    echo default-storage-engine=InnoDB
+    echo max_allowed_packet=64M
+    echo innodb_buffer_pool_size=256M
+    echo innodb_log_file_size=64M
+    echo sql_mode=NO_ENGINE_SUBSTITUTION
+) > "%MY_INI%"
+if exist "%DATA_DIR%" (
+    (
+        echo [mysqld]
+        echo datadir=!SAFE_DATA!
+        echo [client]
+        echo plugin-dir=!SAFE_BASE!/lib/plugin
+    ) > "%DATA_DIR%\my.ini" 2>nul
+)
+exit /b 0
+
 :menu
 cls
 echo ========================================
@@ -39,6 +71,7 @@ echo [*] Checking Database Port 3306...
 netstat -ano | findstr ":3306 " | findstr "LISTENING" >nul 2>&1
 if not errorlevel 1 (
     echo [OK] MySQL/MariaDB is ALREADY running on port 3306.
+    call :check_swordie232
     if not "%1"=="start" pause
     exit /b 0
 )
@@ -53,6 +86,20 @@ if not exist "%MARIADB_DIR%\bin\mysqld.exe" (
 )
 
 if not exist "%DATA_DIR%" mkdir "%DATA_DIR%"
+
+:: 1. Sync dynamic paths in my.ini
+call :sync_ini
+
+:: 2. Auto-initialize system tables if not found
+if not exist "%DATA_DIR%\mysql" (
+    echo [*] Database data directory not initialized.
+    echo [*] Auto-initializing system tables with mariadb-install-db...
+    if exist "%MARIADB_DIR%\bin\mariadb-install-db.exe" (
+        "%MARIADB_DIR%\bin\mariadb-install-db.exe" "--datadir=%DATA_DIR%" "--password=root"
+    ) else if exist "%MARIADB_DIR%\bin\mysql_install_db.exe" (
+        "%MARIADB_DIR%\bin\mysql_install_db.exe" "--datadir=%DATA_DIR%" "--password=root"
+    )
+)
 
 echo [*] Starting Portable MariaDB daemon on port 3306...
 start "Portable MariaDB Server" /min "%MARIADB_DIR%\bin\mysqld.exe" --defaults-file="%MY_INI%" --console
@@ -71,10 +118,22 @@ for /l %%i in (1,1,10) do (
 :start_ok
 if "!STARTED!"=="1" (
     echo [OK] Portable MariaDB started successfully on port 3306!
+    call :check_swordie232
 ) else (
     echo [X] WARNING: Failed to start Portable MariaDB on port 3306.
 )
 if not "%1"=="start" pause
+exit /b 0
+
+:check_swordie232
+:: Verify if swordie232 database exists, auto-import if missing
+if exist "%MARIADB_DIR%\bin\mysql.exe" (
+    "%MARIADB_DIR%\bin\mysql.exe" -h 127.0.0.1 -P 3306 -u root -proot -e "USE swordie232;" >nul 2>&1
+    if errorlevel 1 (
+        echo [*] Database 'swordie232' not found. Auto-importing base game tables...
+        call powershell -NoProfile -ExecutionPolicy Bypass -File "%PROJECT_ROOT%\tools\import_db.ps1" -Auto
+    )
+)
 exit /b 0
 
 :stop
@@ -108,27 +167,52 @@ echo   MariaDB / Database Status
 echo ========================================
 echo.
 netstat -ano | findstr ":3306 " | findstr "LISTENING" >nul 2>&1
-if not errorlevel 1 (
-    for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":3306 " ^| findstr "LISTENING"') do (
-        echo   [OK] Database Server is ACTIVE on port 3306 (PID: %%a)
-    )
-) else (
-    echo   [X] Port 3306 is INACTIVE (No Database Server running)
+if errorlevel 1 goto status_not_running
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":3306 " ^| findstr "LISTENING"') do (
+    echo   [OK] Database Server is ACTIVE on port 3306 [PID: %%a]
 )
+goto status_check_files
+
+:status_not_running
+echo   [X] Port 3306 is INACTIVE [No Database Server running]
+
+:status_check_files
 echo.
 if exist "%MARIADB_DIR%\bin\mysqld.exe" (
-    echo   [*] Portable MariaDB binary: INSTALLED (%MARIADB_DIR%)
+    echo   [*] Portable MariaDB binary: INSTALLED [%MARIADB_DIR%]
 ) else (
     echo   [*] Portable MariaDB binary: NOT INSTALLED
 )
 if exist "%DATA_DIR%" (
-    echo   [*] Database data directory: FOUND (%DATA_DIR%)
+    echo   [*] Database data directory: FOUND [%DATA_DIR%]
 ) else (
     echo   [*] Database data directory: NOT CREATED
 )
+
+if exist "%MARIADB_DIR%\bin\mysql.exe" (
+    netstat -ano | findstr ":3306 " | findstr "LISTENING" >nul 2>&1
+    if not errorlevel 1 (
+        "%MARIADB_DIR%\bin\mysql.exe" -h 127.0.0.1 -P 3306 -u root -proot -e "USE swordie232;" >nul 2>&1
+        if errorlevel 1 (
+            echo   [^!] Game Database: 'swordie232' NOT FOUND [Will auto-import on start]
+        ) else (
+            echo   [OK] Game Database: 'swordie232' is READY
+        )
+    ) else (
+        if exist "%DATA_DIR%\swordie232" (
+            echo   [OK] Game Database: 'swordie232' FOUND in data folder
+        ) else (
+            echo   [^!] Game Database: 'swordie232' NOT FOUND [Will auto-import on start]
+        )
+    )
+)
+
 echo.
-pause
-goto menu
+if not "%1"=="status" (
+    pause
+    goto menu
+)
+exit /b 0
 
 :setup
 echo.

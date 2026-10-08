@@ -47,3 +47,19 @@
   - Compile และ Build ผ่านเรียบร้อย
   - Portable MariaDB และเซิร์ฟเวอร์เกมทดสอบรันสำเร็จสมบูรณ์
 
+### แก้ไขครั้งที่ 3 — 2026-10-08
+- **ผู้รับผิดชอบ / Session**: Pair Programming AI Assistant (Self-Healing Portable Database & Path Sync)
+- **รายการที่ทำ**:
+  - เพิ่มระบบ `:sync_ini` ใน `tools/_mariadb.bat` ซิงค์ไดเรกทอรีใน `my.ini` แบบ Dynamic อัตโนมัติ ป้องกันปัญหา Path คลาดเคลื่อนเมื่อย้ายโฟลเดอร์หรือก๊อปปี้ไปเครื่องอื่น
+  - เพิ่มระบบ Auto-initialize System Tables ด้วย `mariadb-install-db.exe` อัตโนมัติเมื่อตรวจไม่พบโฟลเดอร์ระบบ
+  - เพิ่มระบบตรวจสอบตารางเกม `swordie232` และ Auto-import ฐานข้อมูลอัตโนมัติทั้งใน `tools/_mariadb.bat` และ `tools/_run.bat`
+  - ปรับปรุงการตรวจสอบสถานะฐานข้อมูล (`:status`) ให้แม่นยำทั้งกรณี MariaDB เปิดอยู่และปิดอยู่ พร้อมแก้ปัญหา Escape อักขระในโหมด DelayedExpansion
+- **ไฟล์ที่สร้าง / แก้ไข / ลบ**:
+  - `tools/_mariadb.bat`
+  - `tools/_run.bat`
+  - `PROGRESS.md`
+- **ผลการทดสอบ / สถานะ**:
+  - รัน `tools\_build.bat` ผ่านสมบูรณ์ (BUILD SUCCESS)
+  - ทดสอบคำสั่ง `_mariadb.bat status` แสดงผลถูกต้องและตรวจสอบฐานข้อมูลแม่นยำ
+
+
