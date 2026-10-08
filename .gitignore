@@ -125,4 +125,6 @@ tespia_scripts/
 launcher/bin/
 launcher/obj/
 dist_release/
+*.pdb
+
 

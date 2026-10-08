@@ -144,6 +144,50 @@
   - ตรวจสอบ Manifest Resources ใน `SwordieLauncher.dll` พบ `SwordieLauncher.g.resources` สมบูรณ์
   - ทดสอบรัน `SwordieLauncher.exe` สามารถเปิดหน้าต่าง WPF Desktop ได้สำเร็จสมบูรณ์
 
+### แก้ไขครั้งที่ 7 — 2026-10-08
+- **ผู้รับผิดชอบ / Session**: Pair Programming AI Assistant (WinForms Classic Windows XP Luna Theme & No Emoji Migration)
+- **รายการที่ทำ**:
+  1. **เปลี่ยนสถาปัตยกรรม GUI จาก WPF เป็น Windows Forms (WinForms)**:
+     - ปรับคอนฟิก `launcher/SwordieLauncher.csproj` ให้ใช้งาน `<UseWindowsForms>true</UseWindowsForms>` บน .NET 10 (windows)
+     - ลบไฟล์ XAML/BAML ของ WPF ที่ไม่จำเป็นออกทั้งหมด (`App.xaml`, `App.xaml.cs`, `MainWindow.xaml`, `MainWindow.xaml.cs`, `AssemblyInfo.cs`)
+     - สร้าง `launcher/Program.cs` สำหรับ Entry Point และ Global Exception Handler บันทึกความผิดพลาดลงไฟล์ log
+  2. **ออกแบบ UI สไตล์ Windows XP Classic Luna Wizard (อ้างอิง nLite Task Selection)**:
+     - พัฒนา `launcher/MainForm.cs` ด้วยสไตล์ Windows XP Luna ดั้งเดิม สีพื้นหลังกล่องโต้ตอบ `#ECE9D8`
+     - แถบหัวด้านบนสีน้ำเงินไล่เฉด Luna Blue Gradient พร้อมชื่อทาสก์ตัวหนาชัดเจน
+     - เมนูหมวดหมู่ฝั่งซ้ายแบบบล็อกคลาสสิก (Integrate, Terminal, Setup, Diagnose, Create)
+     - ปุ่มเลือกงานหลัก (Task Buttons) แสดงเครื่องหมาย Bullet ทรงกลมแยกตามฟังก์ชัน (Service Pack, Drivers, Hotfixes, Components, Unattended, Options, Tweaks, Bootable ISO)
+     - ออกแบบปุ่มกดให้มีขนาดใหญ่ ชัดเจน ไม่เบียดเสียด (ความสูงปุ่ม 36 - 42px) พร้อมใช้ฟอนต์ Tahoma ตัวหนา คมชัด
+  3. **บังคับใช้นโยบายห้ามใช้ Emoji โดยเด็ดขาด (Strictly NO Emojis Policy)**:
+     - ยกเลิกการใช้ Emoji ทุกจุดในระบบ ทั้งโค้ด, UI, ปุ่มกด, ข้อความแจ้งเตือน, ป้ายกำกับ, Console Log และ Dialog
+     - เปลี่ยนมาใช้แท็กข้อความวงเล็บก้ามปูทางการ เช่น `[OK]`, `[ALERT]`, `[CONFLICT]`, `[INFO]`, `[ERROR]`, `[STATUS]`
+  4. **คงฟังก์ชันหลักครบถ้วนสมบูรณ์**:
+     - ระบบ Real-Time Port Conflict Detection & 1-Click Process Kill (3306, 8484, 8585, 8483, 3000)
+     - ระบบ Live Embedded CMD Console สตรีม Log การทำงานของ Server, MariaDB, Maven Build, และ Database Import แบบเรียลไทม์
+     - ระบบ In-App Configuration Editor สำหรับอ่านและแก้ไข `resources/db.properties` ในตัวโปรแกรม
+     - ระบบ Protected Source Code Distribution สำหรับสร้าง Release Package โดยไม่เปิดเผย `src/` และ `pom.xml`
+  5. **บันทึกมาตรฐานลงใน AGENTS.md และ README.md**:
+     - เพิ่มข้อกำหนดข้อที่ 7 ใน `AGENTS.md` เรื่องมาตรฐาน GUI Launcher (WinForms, สไตล์ Windows XP และห้ามมี Emoji)
+     - อัปเดตรายละเอียดใน `README.md`
+- **ไฟล์ที่สร้าง / แก้ไข / ลบ**:
+  - `launcher/SwordieLauncher.csproj` (แก้ไขเป็น WinForms)
+  - `launcher/Program.cs` (สร้างใหม่)
+  - `launcher/MainForm.cs` (สร้างใหม่)
+  - `launcher/App.xaml` (ลบ)
+  - `launcher/App.xaml.cs` (ลบ)
+  - `launcher/MainWindow.xaml` (ลบ)
+  - `launcher/MainWindow.xaml.cs` (ลบ)
+  - `launcher/AssemblyInfo.cs` (ลบ)
+  - `launcher/Services/DistributionService.cs` (แก้ไขการคัดลอกไฟล์รันไทม์)
+  - `SwordieLauncher.exe` (คอมไพล์และอัปเดตไฟล์รันไทม์)
+  - `SwordieLauncher.dll` (อัปเดต)
+  - `AGENTS.md` (เพิ่มข้อ 7)
+  - `README.md` (อัปเดตคำอธิบาย WinForms Classic)
+  - `PROGRESS.md`
+- **ผลการทดสอบ / สถานะ**:
+  - คอมไพล์ `dotnet build launcher/SwordieLauncher.csproj -c Release` ผ่าน 0 Warnings, 0 Errors
+  - ทดสอบรัน `SwordieLauncher.exe` ทำงานได้สมบูรณ์ หน้าต่าง WinForms สไตล์คลาสสิกเปิดขึ้นมาได้ทันทีโดยไม่มี Crash
+
+
 
 
 

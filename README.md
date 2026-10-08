@@ -27,7 +27,7 @@ v232_Src_server/
 ├── LICENSE.md                   # สัญญาอนุญาตการใช้งานซอฟต์แวร์
 ├── pom.xml                      # ไฟล์กำหนดโครงสร้างและ Dependency ของ Maven
 │
-├── launcher/                    # ซอร์สโค้ด GUI Launcher (.NET 10 WPF Desktop)
+├── launcher/                    # ซอร์สโค้ด GUI Launcher (.NET 10 WinForms สไตล์ Windows XP คลาสสิก)
 ├── bin/                         # โฟลเดอร์ปลายทางของไฟล์คอมไพล์ (.class, .jar)
 ├── dat/                         # ข้อมูล Data Cache ของ WZ (Items, Maps, Skills ฯลฯ)
 ├── data/                        # โฟลเดอร์ข้อมูลรันไทม์
@@ -99,7 +99,7 @@ v232_Src_server/
 
 | ตัวเลือก | ฟังก์ชัน | คำอธิบาย |
 |:-------:|:--------|:---------|
-| **[G]** | Launch GUI Control Center | เปิดคอนโซลแบบกราฟิก (WPF Modern Glassmorphism สไตล์ nLite Wizard) |
+| **[G]** | Launch GUI Control Center | เปิดคอนโซลแบบกราฟิก (WinForms สไตล์ Windows XP Luna Wizard คลาสสิก) |
 | **[1]** | Build Project | คอมไพล์ซอร์สโค้ดทั้งหมดด้วย Maven แบบออฟไลน์ |
 | **[2]** | Run Server (with Log Window) | สตาร์ทเซิร์ฟเวอร์พร้อมเปิดหน้าต่าง Live Log แบบเรียลไทม์ |
 | **[3]** | Run Server (silent) | สตาร์ทเซิร์ฟเวอร์ในหน้าต่างเดียว ไม่เปิดหน้าต่างเสริม |

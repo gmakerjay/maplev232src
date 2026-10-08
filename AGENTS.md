@@ -98,3 +98,23 @@
      ```powershell
      mvn compile -DskipTests
      ```
+
+---
+
+## 7. มาตรฐาน GUI Launcher (WinForms, Classic Windows XP & No Emoji Policy)
+
+1. **ห้ามใช้ Emoji ใดๆ ทั้งสิ้น (Strictly NO Emojis Policy)**:
+   - ห้ามใส่สัญลักษณ์ Emoji ใดๆ ในโค้ด, UI, ปุ่มกด, ป้ายกำกับ (Label), ข้อความเตือน (Dialog), คอนโซล Log หรือ Git Commit Message โดยเด็ดขาด
+   - หากต้องการระบุสถานะหรือแท็ก ให้ใช้ตัวหนังสือทางการหรือสัญลักษณ์วงเล็บก้ามปู เช่น `[OK]`, `[ALERT]`, `[CONFLICT]`, `[INFO]`, `[ERROR]`, `[STATUS]`
+2. **เทคโนโลยี GUI**:
+   - พัฒนาด้วย **C# Windows Forms (WinForms)** บน `.NET 10 (windows)`
+   - ไม่ใช้ WPF เพื่อหลีกเลี่ยงปัญหาความเข้ากันได้ของการกระจายทรัพยากร XAML / BAML ในสภาพแวดล้อม Portable
+3. **ดีไซน์และรูปลักษณ์ (Classic Windows XP Luna Wizard Style)**:
+   - หน้าตาและเลย์เอาต์ยึดสไตล์ **Windows XP Classic Luna Wizard** (อ้างอิงหน้าต่าง Task Selection ของ nLite)
+   - แถบหัวด้านบนใช้แถบสีน้ำเงินไล่เฉด Luna Blue Gradient พร้อมชื่อหัวข้อชัดเจน
+   - โทนสีพื้นหลังหน้าต่างใช้สีเทาอ่อนคลาสสิกของวินโดวส์ XP (`#ECE9D8`)
+   - ปุ่มทาสก์มีเครื่องหมาย Bullet ทรงกลมคลาสสิกจำแนกหมวดหมู่
+4. **ปุ่มกดต้องใหญ่และชัดเจน (Large & Clear Buttons)**:
+   - ปุ่มกดทุกปุ่มต้องมีขนาดใหญ่ ชัดเจน อ่านง่าย ไม่เบียดเสียด (ความสูงขั้นต่ำ 36-42px)
+   - ใช้ฟอนต์มาตรฐาน `Tahoma` ขนาด 9pt - 10pt ตัวหนา คมชัด สบายตา
+
