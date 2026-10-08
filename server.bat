@@ -18,7 +18,8 @@ echo   [5] Stop Server
 echo   [6] View Logs
 echo   [7] Check Environment
 echo   [8] Kill All Processes (Force)
-echo   [9] Import Database (MySQL)
+echo   [9] Import Database (SQL)
+echo   [D] Portable MariaDB Controller
 echo   [0] Exit
 echo.
 echo ========================================
@@ -33,6 +34,7 @@ if "%choice%"=="6" goto viewlogs
 if "%choice%"=="7" goto check
 if "%choice%"=="8" goto killall
 if "%choice%"=="9" goto import_db
+if /I "%choice%"=="D" goto mariadb
 if "%choice%"=="0" goto end
 goto menu
 
@@ -441,6 +443,10 @@ echo   Importing Database...
 echo ----------------------------------------
 echo.
 call "import_db.bat"
+goto menu
+
+:mariadb
+call "tools\_mariadb.bat"
 goto menu
 
 :end
