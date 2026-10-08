@@ -19,6 +19,8 @@ public class MainForm : Form
     private readonly DistributionService _distService;
     private readonly System.Windows.Forms.Timer _portTimer;
     private DatabaseConfig _currentConfig = new();
+    private Image? _rawBgImage;
+    private Bitmap? _cachedBgBitmap;
 
     // Top Header & Alert Controls
     private Panel _pnlHeader = null!;
@@ -124,28 +126,92 @@ public class MainForm : Form
         _processManager.Log("==================================================", LogLevel.Highlight);
     }
 
+    private void LoadBackgroundImage()
+    {
+        string bgPath = Path.Combine(_projectRoot, "bgasset.jpg");
+        if (File.Exists(bgPath))
+        {
+            try
+            {
+                _rawBgImage = Image.FromFile(bgPath);
+                UpdateCachedBackground();
+            }
+            catch { }
+        }
+    }
+
+    private void UpdateCachedBackground()
+    {
+        if (_rawBgImage == null || ClientSize.Width <= 0 || ClientSize.Height <= 0)
+            return;
+
+        var bmp = new Bitmap(ClientSize.Width, ClientSize.Height);
+        using (var g = Graphics.FromImage(bmp))
+        {
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.DrawImage(_rawBgImage, 0, 0, ClientSize.Width, ClientSize.Height);
+        }
+
+        _cachedBgBitmap?.Dispose();
+        _cachedBgBitmap = bmp;
+    }
+
+    public void DrawCanvasBackground(Control control, Graphics g, int overlayAlpha = 35, Color? tintColor = null)
+    {
+        if (_cachedBgBitmap == null)
+        {
+            using var defaultBrush = new SolidBrush(Color.FromArgb(236, 233, 216));
+            g.FillRectangle(defaultBrush, control.ClientRectangle);
+            return;
+        }
+
+        Point screenPt = control.PointToScreen(Point.Empty);
+        Point formPt = PointToClient(screenPt);
+        var srcRect = new Rectangle(formPt.X, formPt.Y, control.Width, control.Height);
+
+        if (srcRect.X < 0) { srcRect.Width += srcRect.X; srcRect.X = 0; }
+        if (srcRect.Y < 0) { srcRect.Height += srcRect.Y; srcRect.Y = 0; }
+        if (srcRect.Right > _cachedBgBitmap.Width) { srcRect.Width = _cachedBgBitmap.Width - srcRect.X; }
+        if (srcRect.Bottom > _cachedBgBitmap.Height) { srcRect.Height = _cachedBgBitmap.Height - srcRect.Y; }
+
+        if (srcRect.Width > 0 && srcRect.Height > 0)
+        {
+            var destRect = new Rectangle(0, 0, control.Width, control.Height);
+            g.DrawImage(_cachedBgBitmap, destRect, srcRect, GraphicsUnit.Pixel);
+
+            if (overlayAlpha > 0)
+            {
+                Color overlayColor = tintColor.HasValue 
+                    ? Color.FromArgb(overlayAlpha, tintColor.Value) 
+                    : Color.FromArgb(overlayAlpha, 10, 20, 35);
+                using var brush = new SolidBrush(overlayColor);
+                g.FillRectangle(brush, destRect);
+            }
+        }
+    }
+
+    protected override void OnResize(EventArgs e)
+    {
+        base.OnResize(e);
+        UpdateCachedBackground();
+        Invalidate(true);
+    }
+
     private void InitializeComponents()
     {
         SuspendLayout();
+
+        DoubleBuffered = true;
+        SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
 
         Text = "SwordieMS - Server Control Center";
         Size = new Size(1000, 720);
         MinimumSize = new Size(940, 660);
         StartPosition = FormStartPosition.CenterScreen;
         Font = new Font("Tahoma", 9F, FontStyle.Regular);
-        BackColor = Color.FromArgb(236, 233, 216); // Classic Windows XP Luna Dialog Background
+        BackColor = Color.FromArgb(236, 233, 216);
 
-        // Try load bgasset.jpg as background
-        string bgPath = Path.Combine(_projectRoot, "bgasset.jpg");
-        if (File.Exists(bgPath))
-        {
-            try
-            {
-                BackgroundImage = Image.FromFile(bgPath);
-                BackgroundImageLayout = ImageLayout.Stretch;
-            }
-            catch { }
-        }
+        LoadBackgroundImage();
 
         // 1. Top Luna Blue Header Banner
         _pnlHeader = new Panel
@@ -221,6 +287,10 @@ public class MainForm : Form
         };
         pnlFooter.Paint += (s, e) =>
         {
+            DrawCanvasBackground(pnlFooter, e.Graphics, 0);
+            using var brush = new SolidBrush(Color.FromArgb(225, 236, 233, 216));
+            e.Graphics.FillRectangle(brush, pnlFooter.ClientRectangle);
+
             e.Graphics.DrawLine(new Pen(Color.FromArgb(170, 170, 170)), 0, 0, pnlFooter.Width, 0);
             e.Graphics.DrawLine(new Pen(Color.White), 0, 1, pnlFooter.Width, 1);
         };
@@ -273,11 +343,10 @@ public class MainForm : Form
         pnlFooter.Controls.Add(_btnExit);
 
         // 4. Left Sidebar Category Buttons (Classic nLite Block Buttons)
-        var pnlSidebar = new Panel
+        var pnlSidebar = new LunaCanvasPanel(this, 120, Color.FromArgb(236, 233, 216))
         {
             Dock = DockStyle.Left,
             Width = 150,
-            BackColor = Color.FromArgb(220, 236, 233, 216), // Light tinted
             Padding = new Padding(12, 14, 8, 14)
         };
 
@@ -303,10 +372,9 @@ public class MainForm : Form
         pnlSidebar.Controls.Add(_btnCatCreate);
 
         // 5. Central Work Area Panel
-        _pnlContentArea = new Panel
+        _pnlContentArea = new LunaCanvasPanel(this, 35, Color.FromArgb(10, 20, 35))
         {
             Dock = DockStyle.Fill,
-            BackColor = Color.FromArgb(245, 250, 252),
             Padding = new Padding(10)
         };
 
@@ -339,7 +407,8 @@ public class MainForm : Form
     private void PnlHeader_Paint(object? sender, PaintEventArgs e)
     {
         var rect = _pnlHeader.ClientRectangle;
-        using var brush = new LinearGradientBrush(rect, Color.FromArgb(10, 36, 106), Color.FromArgb(43, 95, 158), LinearGradientMode.Horizontal);
+        DrawCanvasBackground(_pnlHeader, e.Graphics, 0);
+        using var brush = new LinearGradientBrush(rect, Color.FromArgb(215, 10, 36, 106), Color.FromArgb(215, 43, 95, 158), LinearGradientMode.Horizontal);
         e.Graphics.FillRectangle(brush, rect);
         e.Graphics.DrawLine(new Pen(Color.FromArgb(5, 20, 60)), 0, rect.Height - 1, rect.Width, rect.Height - 1);
     }
@@ -349,18 +418,18 @@ public class MainForm : Form
     // ==========================================
     private void BuildTasksView()
     {
-        _viewTasks = new Panel
+        _viewTasks = new LunaCanvasPanel(this, 35, Color.FromArgb(10, 20, 35))
         {
             Dock = DockStyle.Fill,
-            AutoScroll = true,
-            BackColor = Color.FromArgb(248, 249, 250)
+            AutoScroll = true
         };
 
         var lblSelectTitle = new Label
         {
             Text = "Task Selection:",
             Font = new Font("Tahoma", 10F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(20, 40, 80),
+            ForeColor = Color.White,
+            BackColor = Color.Transparent,
             Location = new Point(14, 10),
             AutoSize = true
         };
@@ -449,10 +518,9 @@ public class MainForm : Form
     // ==========================================
     private void BuildConsoleView()
     {
-        _viewConsole = new Panel
+        _viewConsole = new LunaCanvasPanel(this, 40, Color.FromArgb(10, 20, 35))
         {
             Dock = DockStyle.Fill,
-            BackColor = Color.FromArgb(245, 245, 245),
             Visible = false,
             Padding = new Padding(10)
         };
@@ -460,14 +528,16 @@ public class MainForm : Form
         var pnlConsoleTop = new Panel
         {
             Dock = DockStyle.Top,
-            Height = 36
+            Height = 36,
+            BackColor = Color.Transparent
         };
 
         var lblConsoleTitle = new Label
         {
             Text = "Live Embedded CMD Console:",
             Font = new Font("Tahoma", 10F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(20, 40, 80),
+            ForeColor = Color.White,
+            BackColor = Color.Transparent,
             Location = new Point(2, 8),
             AutoSize = true
         };
@@ -475,6 +545,8 @@ public class MainForm : Form
         _chkAutoScroll = new CheckBox
         {
             Text = "Auto Scroll",
+            ForeColor = Color.White,
+            BackColor = Color.Transparent,
             Checked = true,
             Location = new Point(480, 8),
             AutoSize = true
@@ -514,11 +586,10 @@ public class MainForm : Form
     // ==========================================
     private void BuildConfigView()
     {
-        _viewConfig = new Panel
+        _viewConfig = new LunaCanvasPanel(this, 40, Color.FromArgb(10, 20, 35))
         {
             Dock = DockStyle.Fill,
             AutoScroll = true,
-            BackColor = Color.FromArgb(245, 245, 245),
             Visible = false,
             Padding = new Padding(12)
         };
@@ -528,6 +599,7 @@ public class MainForm : Form
             Text = "Database Configuration (resources/db.properties)",
             Font = new Font("Tahoma", 9.5F, FontStyle.Bold),
             ForeColor = Color.FromArgb(20, 40, 80),
+            BackColor = Color.FromArgb(240, 245, 248, 252),
             Location = new Point(14, 12),
             Size = new Size(760, 220)
         };
@@ -543,6 +615,7 @@ public class MainForm : Form
             Text = "Server Port Configuration",
             Font = new Font("Tahoma", 9.5F, FontStyle.Bold),
             ForeColor = Color.FromArgb(20, 40, 80),
+            BackColor = Color.FromArgb(240, 245, 248, 252),
             Location = new Point(14, 242),
             Size = new Size(760, 150)
         };
@@ -562,7 +635,8 @@ public class MainForm : Form
         {
             Text = "",
             Font = new Font("Tahoma", 9F, FontStyle.Bold),
-            ForeColor = Color.DarkGreen,
+            ForeColor = Color.LightGreen,
+            BackColor = Color.Transparent,
             Location = new Point(385, 414),
             AutoSize = true
         };
@@ -600,10 +674,9 @@ public class MainForm : Form
     // ==========================================
     private void BuildDiagnosticsView()
     {
-        _viewDiagnostics = new Panel
+        _viewDiagnostics = new LunaCanvasPanel(this, 40, Color.FromArgb(10, 20, 35))
         {
             Dock = DockStyle.Fill,
-            BackColor = Color.FromArgb(245, 245, 245),
             Visible = false,
             Padding = new Padding(12)
         };
@@ -612,7 +685,8 @@ public class MainForm : Form
         {
             Text = "Port Status & Process Conflict Diagnostics:",
             Font = new Font("Tahoma", 10F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(20, 40, 80),
+            ForeColor = Color.White,
+            BackColor = Color.Transparent,
             Location = new Point(14, 10),
             AutoSize = true
         };
@@ -650,11 +724,11 @@ public class MainForm : Form
     // ==========================================
     private void BuildDistributionView()
     {
-        _viewDistribution = new Panel
+        _viewDistribution = new LunaCanvasPanel(this, 40, Color.FromArgb(10, 20, 35))
         {
             Dock = DockStyle.Fill,
-            BackColor = Color.FromArgb(245, 245, 245),
             Visible = false,
+            AutoScroll = true,
             Padding = new Padding(14)
         };
 
@@ -662,9 +736,19 @@ public class MainForm : Form
         {
             Text = "Export Distribution Package (Source Code Protection)",
             Font = new Font("Tahoma", 11F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(20, 40, 80),
+            ForeColor = Color.White,
+            BackColor = Color.Transparent,
             Location = new Point(14, 14),
             AutoSize = true
+        };
+
+        var pnlInfoCard = new Panel
+        {
+            Location = new Point(14, 46),
+            Size = new Size(760, 106),
+            BackColor = Color.FromArgb(240, 245, 248, 252),
+            BorderStyle = BorderStyle.FixedSingle,
+            Padding = new Padding(10)
         };
 
         var lblDistDesc = new Label
@@ -675,16 +759,18 @@ public class MainForm : Form
                    "3. Moddable Scripts: Python (.py) and Kotlin (.kts) scripts in 'scripts/' remain editable.\n" +
                    "4. Portable Tools: Embedded MariaDB, JDK 21, and database tables are included for plug-and-play.",
             Font = new Font("Tahoma", 9F, FontStyle.Regular),
-            ForeColor = Color.FromArgb(50, 50, 50),
-            Location = new Point(14, 46),
-            Size = new Size(760, 100)
+            ForeColor = Color.FromArgb(40, 40, 40),
+            Dock = DockStyle.Fill
         };
+        pnlInfoCard.Controls.Add(lblDistDesc);
 
         var lblTarget = new Label
         {
             Text = "Target Output Directory:",
             Font = new Font("Tahoma", 9F, FontStyle.Bold),
-            Location = new Point(14, 160),
+            ForeColor = Color.White,
+            BackColor = Color.Transparent,
+            Location = new Point(14, 166),
             AutoSize = true
         };
 
@@ -692,11 +778,11 @@ public class MainForm : Form
         {
             Text = "dist_release",
             Font = new Font("Tahoma", 9.5F, FontStyle.Regular),
-            Location = new Point(14, 184),
+            Location = new Point(14, 190),
             Size = new Size(340, 24)
         };
 
-        _btnStartExport = CreateButton("Export Distribution Package Now", 260, 40, 14, 224, Color.FromArgb(220, 245, 220));
+        _btnStartExport = CreateButton("Export Distribution Package Now", 260, 40, 14, 228, Color.FromArgb(220, 245, 220));
         _btnStartExport.Font = new Font("Tahoma", 9.5F, FontStyle.Bold);
         _btnStartExport.Click += BtnStartExport_Click;
 
@@ -704,13 +790,14 @@ public class MainForm : Form
         {
             Text = "",
             Font = new Font("Tahoma", 9F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(0, 100, 0),
-            Location = new Point(14, 276),
+            ForeColor = Color.LightGreen,
+            BackColor = Color.Transparent,
+            Location = new Point(14, 280),
             Size = new Size(740, 40)
         };
 
         _viewDistribution.Controls.Add(lblDistTitle);
-        _viewDistribution.Controls.Add(lblDistDesc);
+        _viewDistribution.Controls.Add(pnlInfoCard);
         _viewDistribution.Controls.Add(lblTarget);
         _viewDistribution.Controls.Add(_txtDistTarget);
         _viewDistribution.Controls.Add(_btnStartExport);
@@ -1028,3 +1115,25 @@ public class MainForm : Form
         base.OnFormClosing(e);
     }
 }
+
+public class LunaCanvasPanel : Panel
+{
+    private readonly MainForm _mainForm;
+    private readonly int _overlayAlpha;
+    private readonly Color? _tintColor;
+
+    public LunaCanvasPanel(MainForm mainForm, int overlayAlpha = 35, Color? tintColor = null)
+    {
+        _mainForm = mainForm;
+        _overlayAlpha = overlayAlpha;
+        _tintColor = tintColor;
+        DoubleBuffered = true;
+        SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
+    }
+
+    protected override void OnPaintBackground(PaintEventArgs e)
+    {
+        _mainForm.DrawCanvasBackground(this, e.Graphics, _overlayAlpha, _tintColor);
+    }
+}
+
