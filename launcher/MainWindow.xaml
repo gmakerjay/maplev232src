@@ -135,7 +135,7 @@
     <!-- Main Background Grid -->
     <Grid>
         <!-- Background Image with fallback color -->
-        <Image x:Name="BgImage" Source="bgasset.jpg" Stretch="UniformToFill" Opacity="0.35"/>
+        <Image x:Name="BgImage" Stretch="UniformToFill" Opacity="0.35"/>
         
         <!-- Dark Tint / Frosted Glass Overlay -->
         <Border Background="{StaticResource GlassPanelBrush}"/>

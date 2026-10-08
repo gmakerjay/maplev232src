@@ -77,6 +77,9 @@ public class DistributionService
                     "PROGRESS.md",
                     "LICENSE.md",
                     "SwordieLauncher.exe",
+                    "SwordieLauncher.dll",
+                    "SwordieLauncher.runtimeconfig.json",
+                    "SwordieLauncher.deps.json",
                     "bgasset.jpg"
                 };
 

@@ -92,36 +92,43 @@ public partial class MainWindow : Window
 
     private void CheckPorts()
     {
-        var ports = _portMonitor.CheckPorts(_processManager.ServerPid, _processManager.MariaDbPid);
-        LvPorts.ItemsSource = ports;
-
-        // MariaDB Status Badge
-        var mariaPort = ports.FirstOrDefault(p => p.Port == 3306);
-        bool isDbRunning = mariaPort != null && mariaPort.IsListening;
-        LedMariaDb.Fill = new SolidColorBrush(isDbRunning ? Color.FromRgb(16, 185, 129) : Color.FromRgb(239, 68, 68));
-        TxtMariaDbBadge.Text = isDbRunning ? "MariaDB: Active (3306)" : "MariaDB: Inactive";
-
-        // Server Status Badge
-        bool isServerRunning = _processManager.IsServerRunning;
-        LedServer.Fill = new SolidColorBrush(isServerRunning ? Color.FromRgb(16, 185, 129) : Color.FromRgb(239, 68, 68));
-        TxtServerBadge.Text = isServerRunning ? "Server: Running" : "Server: Stopped";
-
-        // Port Conflict Badge & Alert Banner
-        var conflicts = ports.Where(p => p.IsConflict).ToList();
-        if (conflicts.Count > 0)
+        try
         {
-            LedConflict.Fill = new SolidColorBrush(Color.FromRgb(239, 68, 68));
-            TxtConflictBadge.Text = $"Conflict: {conflicts.Count} Port(s)";
+            var ports = _portMonitor.CheckPorts(_processManager.ServerPid, _processManager.MariaDbPid);
+            LvPorts.ItemsSource = ports;
 
-            var conflictDesc = string.Join(", ", conflicts.Select(c => $"Port {c.Port} ({c.ProcessName} PID: {c.ProcessId})"));
-            TxtConflictMessage.Text = $"ตรวจพบพอร์ตชน: {conflictDesc}";
-            ConflictAlertBanner.Visibility = Visibility.Visible;
+            // MariaDB Status Badge
+            var mariaPort = ports.FirstOrDefault(p => p.Port == 3306);
+            bool isDbRunning = mariaPort != null && mariaPort.IsListening;
+            LedMariaDb.Fill = new SolidColorBrush(isDbRunning ? Color.FromRgb(16, 185, 129) : Color.FromRgb(239, 68, 68));
+            TxtMariaDbBadge.Text = isDbRunning ? "MariaDB: Active (3306)" : "MariaDB: Inactive";
+
+            // Server Status Badge
+            bool isServerRunning = _processManager.IsServerRunning;
+            LedServer.Fill = new SolidColorBrush(isServerRunning ? Color.FromRgb(16, 185, 129) : Color.FromRgb(239, 68, 68));
+            TxtServerBadge.Text = isServerRunning ? "Server: Running" : "Server: Stopped";
+
+            // Port Conflict Badge & Alert Banner
+            var conflicts = ports.Where(p => p.IsConflict).ToList();
+            if (conflicts.Count > 0)
+            {
+                LedConflict.Fill = new SolidColorBrush(Color.FromRgb(239, 68, 68));
+                TxtConflictBadge.Text = $"Conflict: {conflicts.Count} Port(s)";
+
+                var conflictDesc = string.Join(", ", conflicts.Select(c => $"Port {c.Port} ({c.ProcessName} PID: {c.ProcessId})"));
+                TxtConflictMessage.Text = $"ตรวจพบพอร์ตชน: {conflictDesc}";
+                ConflictAlertBanner.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                LedConflict.Fill = new SolidColorBrush(Color.FromRgb(16, 185, 129));
+                TxtConflictBadge.Text = "Ports: Clear";
+                ConflictAlertBanner.Visibility = Visibility.Collapsed;
+            }
         }
-        else
+        catch (Exception ex)
         {
-            LedConflict.Fill = new SolidColorBrush(Color.FromRgb(16, 185, 129));
-            TxtConflictBadge.Text = "Ports: Clear";
-            ConflictAlertBanner.Visibility = Visibility.Collapsed;
+            try { File.AppendAllText("launcher_startup.log", $"CheckPorts exception: {ex}\n"); } catch { }
         }
     }
 

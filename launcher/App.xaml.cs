@@ -16,27 +16,14 @@ public partial class App : Application
 
         AppDomain.CurrentDomain.UnhandledException += (s, args) =>
         {
-            File.WriteAllText("launcher_crash.log", args.ExceptionObject.ToString());
+            try { File.WriteAllText("launcher_crash.log", args.ExceptionObject.ToString()); } catch { }
         };
 
         DispatcherUnhandledException += (s, args) =>
         {
-            File.WriteAllText("launcher_crash.log", args.Exception.ToString());
+            try { File.WriteAllText("launcher_crash.log", args.Exception.ToString()); } catch { }
             MessageBox.Show(args.Exception.Message, "Launcher Error", MessageBoxButton.OK, MessageBoxImage.Error);
         };
-
-        try
-        {
-            var window = new MainWindow();
-            MainWindow = window;
-            window.Show();
-        }
-        catch (Exception ex)
-        {
-            File.WriteAllText("launcher_crash.log", ex.ToString());
-            MessageBox.Show($"Failed to initialize MainWindow: {ex.Message}", "Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            Shutdown(1);
-        }
     }
 }
 

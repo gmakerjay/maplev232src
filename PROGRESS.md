@@ -112,9 +112,38 @@
   - `PROGRESS.md`
 - **ผลการทดสอบ / สถานะ**:
   - รัน `dotnet build launcher/SwordieLauncher.csproj` ผ่าน 0 Errors, 0 Warnings
-  - รัน `dotnet publish` ได้ไฟล์ `SwordieLauncher.exe` แบบ Single File ทำงานได้สมบูรณ์
   - รัน `tools\_build.bat` คอมไพล์ Java/Kotlin 1,188 ไฟล์ สำเร็จ (BUILD SUCCESS)
   - ตรวจสอบระบบ Netstat และ Port Monitor พร้อมตรวจจับพอร์ตชนและฆ่าโปรเซสได้ถูกต้อง
+
+### แก้ไขครั้งที่ 6 — 2026-10-08
+- **ผู้รับผิดชอบ / Session**: Pair Programming AI Assistant (Fix GUI Launcher Startup & Resource Resolution)
+- **ปัญหาที่พบ**:
+  - เมื่อดับเบิลคลิก `SwordieLauncher.exe` ตัวโปรแกรมไม่แสดงหน้าต่างขึ้นมา (Crash ทันทีขณะเริ่มต้น)
+  - สาเหตุที่ 1: ใน `MainWindow.xaml` มีการระบุ `Source="bgasset.jpg"` โดยตรงใน XAML ทำให้ WPF XAML Parser ค้นหา Resource จาก Pack URI แล้วไม่พบ ส่งผลให้เกิด `System.IO.IOException: Cannot locate resource 'bgasset.jpg'` ขณะรัน `InitializeComponent()`
+  - สาเหตุที่ 2: การคอมไพล์ด้วยคำสั่ง Publish แบบกำหนด Output ไปที่ Root Directory ทำให้ MSBuild Path คลาดเคลื่อนและข้ามการคอมไพล์ Markup BAML ทำให้ไม่มี `SwordieLauncher.g.resources` บรรจุใน DLL
+  - สาเหตุที่ 3: ไฟล์ Executable (.exe) ของ .NET WPF ต้องการ `SwordieLauncher.dll`, `SwordieLauncher.runtimeconfig.json` และ `SwordieLauncher.deps.json` วางคู่กันเพื่อโหลด WindowsDesktop App Framework
+- **รายการที่แก้ไข**:
+  1. แก้ไข `MainWindow.xaml` โดยตัด `Source="bgasset.jpg"` ออกจาก XAML แล้วให้ฟังก์ชัน `LoadBackgroundImage()` ทำการโหลดภาพจากดิสก์แบบ Dynamic พร้อมระบบ Fallback
+  2. จัดระบบคอมไพล์ใหม่ให้สมบูรณ์ โดยคอมไพล์ผ่าน `dotnet build -c Release` เพื่อสร้าง `SwordieLauncher.g.resources` ใน DLL อย่างถูกต้อง 100%
+  3. คัดลอกชุดไฟล์รันไทม์หลัก (`SwordieLauncher.exe`, `SwordieLauncher.dll`, `SwordieLauncher.runtimeconfig.json`, `SwordieLauncher.deps.json`) วางคู่กันที่ Root โฟลเดอร์
+  4. อัปเดต `DistributionService.cs` ให้คัดลอกไฟล์รันไทม์เหล่านี้ลงในชุดแจกจ่าย `dist_release/` ครบถ้วน
+  5. ทดสอบรันและยืนยันการทำงานของ `App.OnStartup`, `InitializeComponent`, `Loaded` และ `ContentRendered` สำเร็จสมบูรณ์ หน้าต่าง GUI แสดงผลได้ถูกต้อง
+- **ไฟล์ที่สร้าง / แก้ไข / ลบ**:
+  - `launcher/MainWindow.xaml`
+  - `launcher/MainWindow.xaml.cs`
+  - `launcher/App.xaml`
+  - `launcher/App.xaml.cs`
+  - `launcher/SwordieLauncher.csproj`
+  - `launcher/Services/DistributionService.cs`
+  - `SwordieLauncher.exe`
+  - `SwordieLauncher.dll`
+  - `SwordieLauncher.runtimeconfig.json`
+  - `SwordieLauncher.deps.json`
+  - `PROGRESS.md`
+- **ผลการทดสอบ / สถานะ**:
+  - ตรวจสอบ Manifest Resources ใน `SwordieLauncher.dll` พบ `SwordieLauncher.g.resources` สมบูรณ์
+  - ทดสอบรัน `SwordieLauncher.exe` สามารถเปิดหน้าต่าง WPF Desktop ได้สำเร็จสมบูรณ์
+
 
 
 
