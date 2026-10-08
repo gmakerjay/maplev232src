@@ -1,0 +1,641 @@
+<Window x:Class="SwordieLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SwordieMS v232 - Control Center &amp; Task Selection"
+        Height="720" Width="1060"
+        MinHeight="640" MinWidth="920"
+        WindowStartupLocation="CenterScreen"
+        Background="#0B0F17"
+        Foreground="#E2E8F0"
+        FontFamily="Segoe UI, Tahoma, sans-serif">
+
+    <Window.Resources>
+        <!-- Gradients and Brushes -->
+        <LinearGradientBrush x:Key="HeaderGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#0F2B48" Offset="0.0"/>
+            <GradientStop Color="#0A1828" Offset="0.5"/>
+            <GradientStop Color="#060E18" Offset="1.0"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="GlassPanelBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#E60D1522" Offset="0.0"/>
+            <GradientStop Color="#F0090E17" Offset="1.0"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="ButtonNormalGradient" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#2A3B52" Offset="0.0"/>
+            <GradientStop Color="#1A2636" Offset="1.0"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="ButtonHoverGradient" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#3B5272" Offset="0.0"/>
+            <GradientStop Color="#243449" Offset="1.0"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="PrimaryActionGradient" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#0284C7" Offset="0.0"/>
+            <GradientStop Color="#0369A1" Offset="1.0"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="SuccessActionGradient" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#10B981" Offset="0.0"/>
+            <GradientStop Color="#059669" Offset="1.0"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="DangerActionGradient" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#EF4444" Offset="0.0"/>
+            <GradientStop Color="#DC2626" Offset="1.0"/>
+        </LinearGradientBrush>
+
+        <!-- Task Button Style (nLite inspired embossed pill) -->
+        <Style x:Key="NLiteTaskButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource ButtonNormalGradient}"/>
+            <Setter Property="Foreground" Value="#F8FAFC"/>
+            <Setter Property="BorderBrush" Value="#475569"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource ButtonHoverGradient}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#38BDF8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#1E293B"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Category Menu Button -->
+        <Style x:Key="CategoryMenuButton" TargetType="RadioButton">
+            <Setter Property="Background" Value="#1E293B"/>
+            <Setter Property="Foreground" Value="#CBD5E1"/>
+            <Setter Property="BorderBrush" Value="#334155"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="16,14"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <Grid>
+                                <Rectangle x:Name="indicator" Width="4" HorizontalAlignment="Left" Fill="Transparent" RadiusX="2" RadiusY="2" Margin="2,4,0,4"/>
+                                <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,0,0,0"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#2A384C"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#475569"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#1E3A5F"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#38BDF8"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter TargetName="indicator" Property="Fill" Value="#38BDF8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Custom ScrollBar -->
+        <Style TargetType="ScrollBar">
+            <Setter Property="Background" Value="#0F172A"/>
+            <Setter Property="Width" Value="10"/>
+        </Style>
+    </Window.Resources>
+
+    <!-- Main Background Grid -->
+    <Grid>
+        <!-- Background Image with fallback color -->
+        <Image x:Name="BgImage" Source="bgasset.jpg" Stretch="UniformToFill" Opacity="0.35"/>
+        
+        <!-- Dark Tint / Frosted Glass Overlay -->
+        <Border Background="{StaticResource GlassPanelBrush}"/>
+
+        <!-- Main Window Structure -->
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Header -->
+                <RowDefinition Height="Auto"/> <!-- Alert Banner -->
+                <RowDefinition Height="*"/>    <!-- Content (Categories + Tasks) -->
+                <RowDefinition Height="Auto"/> <!-- Footer -->
+            </Grid.RowDefinitions>
+
+            <!-- 1. Header (nLite Style) -->
+            <Border Grid.Row="0" Background="{StaticResource HeaderGradient}" BorderBrush="#1E3A5F" BorderThickness="0,0,0,1" Padding="20,14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="⚔️" FontSize="20" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="SwordieMS v232 — Server Control Center" FontSize="18" FontWeight="Bold" Foreground="#FFFFFF"/>
+                            <Border Background="#0284C7" CornerRadius="4" Padding="6,2" Margin="12,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="TRUE PORTABLE" FontSize="10" FontWeight="Bold" Foreground="#FFFFFF"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="Task Selection: จัดการเซิร์ฟเวอร์, ฐานข้อมูล MariaDB, แก้ไขคอนฟิก, ตรวจจับพอร์ตชน และสร้างชุดแจกจ่าย"
+                                   FontSize="12" Foreground="#94A3B8" Margin="30,4,0,0"/>
+                    </StackPanel>
+
+                    <!-- Real-time Status Badges -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- MariaDB Status Badge -->
+                        <Border x:Name="BadgeMariaDb" Background="#1E293B" BorderBrush="#334155" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="LedMariaDb" Width="10" Height="10" Fill="#EF4444" Margin="0,0,6,0"/>
+                                <TextBlock x:Name="TxtMariaDbBadge" Text="MariaDB: 3306" FontSize="11" FontWeight="SemiBold" Foreground="#E2E8F0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Server Status Badge -->
+                        <Border x:Name="BadgeServer" Background="#1E293B" BorderBrush="#334155" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="LedServer" Width="10" Height="10" Fill="#EF4444" Margin="0,0,6,0"/>
+                                <TextBlock x:Name="TxtServerBadge" Text="Server: Stopped" FontSize="11" FontWeight="SemiBold" Foreground="#E2E8F0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Port Conflict Status Badge -->
+                        <Border x:Name="BadgeConflict" Background="#1E293B" BorderBrush="#334155" BorderThickness="1" CornerRadius="6" Padding="10,6">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="LedConflict" Width="10" Height="10" Fill="#10B981" Margin="0,0,6,0"/>
+                                <TextBlock x:Name="TxtConflictBadge" Text="Ports: Clear" FontSize="11" FontWeight="SemiBold" Foreground="#E2E8F0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- 2. Port Conflict Alert Banner (Collapsible) -->
+            <Border x:Name="ConflictAlertBanner" Grid.Row="1" Background="#7F1D1D" BorderBrush="#EF4444" BorderThickness="0,0,0,1" Padding="16,10" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="⚠️" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtConflictMessage" Grid.Column="1" Text="ตรวจพบพอร์ตชน! กำลังมีโปรเซสอื่นใช้งานพอร์ตของเซิร์ฟเวอร์"
+                               FontSize="13" FontWeight="SemiBold" Foreground="#FEE2E2" VerticalAlignment="Center"/>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button Content="⚡ เคลียร์พอร์ตชนทันที (Kill Conflict)" Background="#DC2626" Foreground="#FFFFFF"
+                                FontWeight="Bold" Padding="12,6" BorderThickness="0" Cursor="Hand" Click="BtnKillConflict_Click"
+                                Margin="0,0,8,0">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                        <Button Content="✕" Width="28" Height="28" Background="#991B1B" Foreground="#F87171"
+                                BorderThickness="0" Cursor="Hand" Click="BtnDismissAlert_Click">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="14"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- 3. Main Body Area (Category Sidebar + Task View Area) -->
+            <Grid Grid.Row="2" Margin="16,16,16,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="230"/> <!-- Left Category Column -->
+                    <ColumnDefinition Width="16"/>  <!-- Spacer -->
+                    <ColumnDefinition Width="*"/>   <!-- Right Task Work Area -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Sidebar: Category Boxes (nLite Style) -->
+                <Border Grid.Column="0" Background="#900F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="14">
+                    <StackPanel>
+                        <TextBlock Text="TASK CATEGORIES" FontSize="11" FontWeight="Bold" Foreground="#64748B" Margin="6,0,0,12"/>
+
+                        <RadioButton x:Name="TabTasks" Content="📋 Task Selection (หน้าหลัก)" IsChecked="True"
+                                     Style="{StaticResource CategoryMenuButton}" Checked="CategoryTab_Checked"/>
+                        <RadioButton x:Name="TabConsole" Content="💻 Live Terminal (CMD ในตัว)"
+                                     Style="{StaticResource CategoryMenuButton}" Checked="CategoryTab_Checked"/>
+                        <RadioButton x:Name="TabConfig" Content="⚙️ Settings (ตั้งค่า DB &amp; Port)"
+                                     Style="{StaticResource CategoryMenuButton}" Checked="CategoryTab_Checked"/>
+                        <RadioButton x:Name="TabDiagnostics" Content="🛡️ Port Diagnostics (ตรวจพอร์ต)"
+                                     Style="{StaticResource CategoryMenuButton}" Checked="CategoryTab_Checked"/>
+                        <RadioButton x:Name="TabDistribution" Content="📦 Distribute (สร้างชุดแจกจ่าย)"
+                                     Style="{StaticResource CategoryMenuButton}" Checked="CategoryTab_Checked"/>
+
+                        <Separator Background="#1E293B" Margin="0,10,0,14"/>
+
+                        <!-- Quick Control Panel Box inside Sidebar -->
+                        <Border Background="#141E2E" BorderBrush="#1E3A5F" BorderThickness="1" CornerRadius="8" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="QUICK ACTIONS" FontSize="10" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,8"/>
+                                <Button x:Name="BtnQuickStartServer" Content="▶ Start Server" Style="{StaticResource NLiteTaskButton}"
+                                        Background="{StaticResource SuccessActionGradient}" Margin="0,0,0,6" Click="BtnStartServer_Click"/>
+                                <Button x:Name="BtnQuickStopServer" Content="⏹ Stop Server" Style="{StaticResource NLiteTaskButton}"
+                                        Background="{StaticResource DangerActionGradient}" Margin="0,0,0,6" Click="BtnStopServer_Click"/>
+                                <Button x:Name="BtnQuickClearPorts" Content="🧹 Free All Ports" Style="{StaticResource NLiteTaskButton}"
+                                        Click="BtnKillAllPorts_Click"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Right Work Area (Views based on selected tab) -->
+                <Border Grid.Column="2" Background="#990F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="18">
+                    <Grid>
+                        <!-- ================= VIEW 1: Task Selection (nLite Main) ================= -->
+                        <Grid x:Name="ViewTasks">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="0,0,10,0">
+                                    <TextBlock Text="Select Tasks to Execute" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,0,4"/>
+                                    <TextBlock Text="กดปุ่มเพื่อสั่งการระบบเซิร์ฟเวอร์ ฐานข้อมูล และการบิลด์แพ็คเกจได้อย่างสะดวกรวดเร็ว"
+                                               FontSize="12" Foreground="#94A3B8" Margin="0,0,0,16"/>
+
+                                    <!-- Task 1: Server Control -->
+                                    <Border Background="#162233" BorderBrush="#253549" BorderThickness="1" CornerRadius="8" Padding="16,12" Margin="0,0,0,10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Ellipse Width="14" Height="14" Fill="#38BDF8" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="Game Server Controller" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                                <TextBlock Text="รันเซิร์ฟเวอร์เกม MapleStory (Login 8484, Bera 8585, API 8483) พร้อมเชื่อมต่อ MariaDB" FontSize="11" Foreground="#94A3B8"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <Button Content="Start Server" Width="105" Style="{StaticResource NLiteTaskButton}"
+                                                        Background="{StaticResource SuccessActionGradient}" Margin="0,0,8,0" Click="BtnStartServer_Click"/>
+                                                <Button Content="Stop" Width="70" Style="{StaticResource NLiteTaskButton}"
+                                                        Background="{StaticResource DangerActionGradient}" Click="BtnStopServer_Click"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Task 2: MariaDB Portable -->
+                                    <Border Background="#162233" BorderBrush="#253549" BorderThickness="1" CornerRadius="8" Padding="16,12" Margin="0,0,0,10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Ellipse Width="14" Height="14" Fill="#10B981" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="Portable MariaDB 10.11" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                                <TextBlock Text="บริการฐานข้อมูลแบบพกพาพอร์ต 3306 (Auto-sync path my.ini ป้องกันปัญหาเมื่อย้ายโฟลเดอร์)" FontSize="11" Foreground="#94A3B8"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                <Button Content="Start MariaDB" Width="105" Style="{StaticResource NLiteTaskButton}"
+                                                        Background="{StaticResource PrimaryActionGradient}" Margin="0,0,8,0" Click="BtnStartMariaDb_Click"/>
+                                                <Button Content="Stop" Width="70" Style="{StaticResource NLiteTaskButton}"
+                                                        Click="BtnStopMariaDb_Click"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Task 3: Import Database -->
+                                    <Border Background="#162233" BorderBrush="#253549" BorderThickness="1" CornerRadius="8" Padding="16,12" Margin="0,0,0,10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Ellipse Width="14" Height="14" Fill="#F59E0B" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="Database Auto-Import &amp; Init" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                                <TextBlock Text="นำเข้าไฟล์โครงสร้างตารางหลักทั้ง 10 ไฟล์ (Base Game 90 ตาราง) สร้างบัญชี admin เริ่มต้น" FontSize="11" Foreground="#94A3B8"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="2" Content="Import DB" Width="105" Style="{StaticResource NLiteTaskButton}"
+                                                    Click="BtnImportDb_Click"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Task 4: Build Shaded JAR -->
+                                    <Border Background="#162233" BorderBrush="#253549" BorderThickness="1" CornerRadius="8" Padding="16,12" Margin="0,0,0,10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Ellipse Width="14" Height="14" Fill="#8B5CF6" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="Compile &amp; Package (Maven Build)" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                                <TextBlock Text="คอมไพล์โค้ด Java และ Kotlin ทั้งหมดเข้าเป็นไฟล์ Shaded JAR ใน bin/ ผ่านคลังไลบรารีออฟไลน์" FontSize="11" Foreground="#94A3B8"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="2" Content="Build Project" Width="105" Style="{StaticResource NLiteTaskButton}"
+                                                    Click="BtnBuildProject_Click"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Task 5: Distribution Exporter -->
+                                    <Border Background="#162233" BorderBrush="#253549" BorderThickness="1" CornerRadius="8" Padding="16,12">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Ellipse Width="14" Height="14" Fill="#EC4899" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="Export Distribution Package" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                                <TextBlock Text="สร้างชุดแจกจ่ายแบบปิดบังซอร์สโค้ดหลัก (แยก src/ ออก) แต่เปิดให้แก้ scripts/ และ sql/" FontSize="11" Foreground="#94A3B8"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="2" Content="Export Release" Width="105" Style="{StaticResource NLiteTaskButton}"
+                                                    Click="BtnExportDistribution_Click"/>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+
+                        <!-- ================= VIEW 2: Embedded Live Terminal (CMD) ================= -->
+                        <Grid x:Name="ViewConsole" Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0" Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="💻 Embedded Live Console Output" FontSize="15" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                    <TextBlock Text="(สตรีม Log ของเซิร์ฟเวอร์แบบเรียลไทม์)" FontSize="12" Foreground="#64748B" Margin="10,2,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <CheckBox x:Name="ChkAutoScroll" Content="Auto Scroll" IsChecked="True" Foreground="#CBD5E1" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                    <Button Content="Clear Log" Padding="10,4" Style="{StaticResource NLiteTaskButton}" Margin="0,0,6,0" Click="BtnClearLog_Click"/>
+                                    <Button Content="Copy Log" Padding="10,4" Style="{StaticResource NLiteTaskButton}" Click="BtnCopyLog_Click"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Console Output Box -->
+                            <Border Grid.Row="1" Background="#06090E" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="8">
+                                <RichTextBox x:Name="RtbConsole" Background="Transparent" Foreground="#E2E8F0"
+                                             FontFamily="Consolas, Cascadia Code, Courier New" FontSize="12"
+                                             IsReadOnly="True" BorderThickness="0"
+                                             VerticalScrollBarVisibility="Auto">
+                                    <FlowDocument PagePadding="4"/>
+                                </RichTextBox>
+                            </Border>
+
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0">
+                                <TextBlock Text="Legend: " FontSize="11" Foreground="#64748B"/>
+                                <TextBlock Text="■ INFO  " FontSize="11" Foreground="#38BDF8"/>
+                                <TextBlock Text="■ SUCCESS  " FontSize="11" Foreground="#10B981"/>
+                                <TextBlock Text="■ WARNING  " FontSize="11" Foreground="#F59E0B"/>
+                                <TextBlock Text="■ ERROR" FontSize="11" Foreground="#EF4444"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- ================= VIEW 3: Settings (db.properties & Port Editor) ================= -->
+                        <Grid x:Name="ViewConfig" Visibility="Collapsed">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="0,0,10,0">
+                                    <TextBlock Text="Configuration &amp; Database Settings" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,0,4"/>
+                                    <TextBlock Text="ปรับแต่งค่าการเชื่อมต่อฐานข้อมูลและพอร์ตของเซิร์ฟเวอร์ เมื่อกดบันทึกจะซิงค์ลงใน resources/db.properties ทันที"
+                                               FontSize="12" Foreground="#94A3B8" Margin="0,0,0,16"/>
+
+                                    <!-- Feedback Alert -->
+                                    <Border x:Name="ConfigSavedAlert" Background="#064E3B" BorderBrush="#10B981" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,14" Visibility="Collapsed">
+                                        <TextBlock x:Name="TxtConfigAlert" Text="บันทึกการตั้งค่าเรียบร้อยแล้ว!" Foreground="#A7F3D0" FontSize="12" FontWeight="SemiBold"/>
+                                    </Border>
+
+                                    <!-- Database Connection Group -->
+                                    <Border Background="#162233" BorderBrush="#253549" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,14">
+                                        <StackPanel>
+                                            <TextBlock Text="DATABASE PROPERTIES (resources/db.properties)" FontSize="13" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,12"/>
+
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="DB Host (IP):" VerticalAlignment="Center" Foreground="#CBD5E1"/>
+                                                <TextBox x:Name="TxtDbHost" Grid.Column="1" Text="127.0.0.1" Background="#0F172A" Foreground="#FFFFFF" BorderBrush="#334155" Padding="8,6"/>
+                                            </Grid>
+
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="DB Port:" VerticalAlignment="Center" Foreground="#CBD5E1"/>
+                                                <TextBox x:Name="TxtDbPort" Grid.Column="1" Text="3306" Background="#0F172A" Foreground="#FFFFFF" BorderBrush="#334155" Padding="8,6"/>
+                                            </Grid>
+
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="DB User:" VerticalAlignment="Center" Foreground="#CBD5E1"/>
+                                                <TextBox x:Name="TxtDbUser" Grid.Column="1" Text="root" Background="#0F172A" Foreground="#FFFFFF" BorderBrush="#334155" Padding="8,6"/>
+                                            </Grid>
+
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="DB Password:" VerticalAlignment="Center" Foreground="#CBD5E1"/>
+                                                <TextBox x:Name="TxtDbPass" Grid.Column="1" Text="root" Background="#0F172A" Foreground="#FFFFFF" BorderBrush="#334155" Padding="8,6"/>
+                                            </Grid>
+
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="DB Name:" VerticalAlignment="Center" Foreground="#CBD5E1"/>
+                                                <TextBox x:Name="TxtDbName" Grid.Column="1" Text="swordie232" Background="#0F172A" Foreground="#FFFFFF" BorderBrush="#334155" Padding="8,6"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Server Ports Group -->
+                                    <Border Background="#162233" BorderBrush="#253549" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,16">
+                                        <StackPanel>
+                                            <TextBlock Text="GAME SERVER NETWORK PORTS" FontSize="13" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,12"/>
+
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Login Port:" VerticalAlignment="Center" Foreground="#CBD5E1"/>
+                                                <TextBox x:Name="TxtLoginPort" Grid.Column="1" Text="8484" Background="#0F172A" Foreground="#FFFFFF" BorderBrush="#334155" Padding="8,6"/>
+                                            </Grid>
+
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Channel Bera Port:" VerticalAlignment="Center" Foreground="#CBD5E1"/>
+                                                <TextBox x:Name="TxtChannelPort" Grid.Column="1" Text="8585" Background="#0F172A" Foreground="#FFFFFF" BorderBrush="#334155" Padding="8,6"/>
+                                            </Grid>
+
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="API Client Port:" VerticalAlignment="Center" Foreground="#CBD5E1"/>
+                                                <TextBox x:Name="TxtApiPort" Grid.Column="1" Text="8483" Background="#0F172A" Foreground="#FFFFFF" BorderBrush="#334155" Padding="8,6"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Save Actions -->
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="🔄 Reload from File" Padding="14,8" Style="{StaticResource NLiteTaskButton}" Margin="0,0,10,0" Click="BtnReloadConfig_Click"/>
+                                        <Button Content="💾 บันทึกการตั้งค่า (Save &amp; Apply)" Padding="18,8" Style="{StaticResource NLiteTaskButton}"
+                                                Background="{StaticResource SuccessActionGradient}" Click="BtnSaveConfig_Click"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+
+                        <!-- ================= VIEW 4: Port Diagnostics ================= -->
+                        <Grid x:Name="ViewDiagnostics" Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Margin="0,0,0,14">
+                                <TextBlock Text="Port Diagnostics &amp; Conflict Management" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                <TextBlock Text="ตรวจสอบการถูกยึดครองพอร์ตของระบบ หากมีโปรแกรมอื่นหรือโปรเซสค้าง สามารถกดสั่งปิดได้ทันที"
+                                           FontSize="12" Foreground="#94A3B8" Margin="0,4,0,0"/>
+                            </StackPanel>
+
+                            <!-- Ports Grid -->
+                            <Border Grid.Row="1" Background="#162233" BorderBrush="#253549" BorderThickness="1" CornerRadius="8" Padding="10">
+                                <ListView x:Name="LvPorts" Background="Transparent" BorderThickness="0" Foreground="#E2E8F0">
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Header="Port" Width="80" DisplayMemberBinding="{Binding Port}"/>
+                                            <GridViewColumn Header="Service / Role" Width="180" DisplayMemberBinding="{Binding Name}"/>
+                                            <GridViewColumn Header="Status" Width="120" DisplayMemberBinding="{Binding StatusText}"/>
+                                            <GridViewColumn Header="PID" Width="80" DisplayMemberBinding="{Binding ProcessId}"/>
+                                            <GridViewColumn Header="Process Name" Width="160" DisplayMemberBinding="{Binding ProcessName}"/>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                            </Border>
+
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+                                <Button Content="🔄 Refresh Ports" Padding="14,8" Style="{StaticResource NLiteTaskButton}" Margin="0,0,10,0" Click="BtnRefreshPorts_Click"/>
+                                <Button Content="⚡ Kill All Conflicting Ports" Padding="16,8" Style="{StaticResource NLiteTaskButton}"
+                                        Background="{StaticResource DangerActionGradient}" Click="BtnKillAllPorts_Click"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- ================= VIEW 5: Distribution Packager ================= -->
+                        <Grid x:Name="ViewDistribution" Visibility="Collapsed">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="0,0,10,0">
+                                    <TextBlock Text="Distribution Packager (สร้างชุดเซิร์ฟเวอร์แจกจ่าย)" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,0,4"/>
+                                    <TextBlock Text="ระบบแยกและปิดบังซอร์สโค้ดแกนหลัก (src/) โดยจะคัดลอกเฉพาะไบนารี JAR, WZ Cache, MariaDB, สคริปต์ และคอนฟิกที่จำเป็นเท่านั้น"
+                                               FontSize="12" Foreground="#94A3B8" Margin="0,0,0,16"/>
+
+                                    <!-- Architecture Explanation Box -->
+                                    <Border Background="#162233" BorderBrush="#253549" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,14">
+                                        <StackPanel>
+                                            <TextBlock Text="🔒 นโยบายการแยกซอร์สโค้ดเพื่อการแจกจ่าย:" FontSize="13" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,8"/>
+                                            <TextBlock Text="• ซอร์สโค้ดหลัก (src/ Java/Kotlin): จะถูกแปลงเป็น Bytecode (.class) อยู่ใน bin/maplestory-1.77.3.jar (ไม่เปิดเผยไฟล์ซอร์ส)" FontSize="12" Foreground="#E2E8F0" Margin="0,0,0,4"/>
+                                            <TextBlock Text="• สคริปต์ที่เปิดให้แก้ไขได้ (scripts/): ยังคงเป็น .py และ .kts เพื่อให้แอดมินหรือทีมงานปรับแต่ง NPC และเควสได้อิสระ" FontSize="12" Foreground="#E2E8F0" Margin="0,0,0,4"/>
+                                            <TextBlock Text="• ฐานข้อมูลและไอเทม (sql/): ไฟล์ SQL คัสตอมและตารางหลักพร้อมรัน" FontSize="12" Foreground="#E2E8F0" Margin="0,0,0,4"/>
+                                            <TextBlock Text="• True Portable: ฝัง JDK 21, MariaDB, Launcher พร้อมรันได้ทุกเครื่องโดยไม่ต้องลงโปรแกรมเพิ่ม" FontSize="12" Foreground="#E2E8F0"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Target Folder Settings -->
+                                    <Border Background="#162233" BorderBrush="#253549" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                                        <StackPanel>
+                                            <TextBlock Text="โฟลเดอร์ปลายทางของชุดแจกจ่าย:" FontSize="12" FontWeight="SemiBold" Foreground="#CBD5E1" Margin="0,0,0,6"/>
+                                            <TextBox x:Name="TxtDistTarget" Text="dist_release" Background="#0F172A" Foreground="#FFFFFF" BorderBrush="#334155" Padding="8,6" Margin="0,0,0,8"/>
+                                            <TextBlock x:Name="TxtDistStatus" Text="พร้อมสร้างชุดแจกจ่าย (คลิกปุ่มด้านล่างเพื่อเริ่มกระบวนการ)" FontSize="11" Foreground="#94A3B8"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Action Button -->
+                                    <Button x:Name="BtnExecuteExport" Content="🚀 สร้างชุดแจกจ่าย (Export Release Package)" Padding="20,12" FontSize="14"
+                                            Style="{StaticResource NLiteTaskButton}" Background="{StaticResource PrimaryActionGradient}"
+                                            HorizontalAlignment="Left" Click="BtnExecuteExport_Click"/>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- 4. Footer Bar (nLite Style) -->
+            <Border Grid.Row="3" Background="#090E17" BorderBrush="#1E293B" BorderThickness="0,1,0,0" Padding="18,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Content="📥 Minimize to Tray" Style="{StaticResource NLiteTaskButton}" Click="BtnTray_Click"/>
+
+                    <TextBlock x:Name="TxtFooterStatus" Grid.Column="1" Text="พร้อมทำงาน (System Ready)"
+                               FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button Content="Start All" Width="85" Style="{StaticResource NLiteTaskButton}"
+                                Background="{StaticResource SuccessActionGradient}" Margin="0,0,8,0" Click="BtnStartAll_Click"/>
+                        <Button Content="Stop All" Width="85" Style="{StaticResource NLiteTaskButton}"
+                                Background="{StaticResource DangerActionGradient}" Margin="0,0,8,0" Click="BtnStopAll_Click"/>
+                        <Button Content="Exit" Width="70" Style="{StaticResource NLiteTaskButton}" Click="BtnExit_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

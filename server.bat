@@ -4,12 +4,18 @@ title SwordieMS - Control Panel (Portable)
 chcp 65001 >nul 2>&1
 cd /d "%~dp0"
 
+:: Check CLI flags for direct GUI launch
+if /I "%~1"=="gui" goto launch_gui
+if /I "%~1"=="--gui" goto launch_gui
+if /I "%~1"=="-g" goto launch_gui
+
 :menu
 cls
 echo ========================================
 echo   SwordieMS - Control Panel
 echo ========================================
 echo.
+echo   [G] Launch Modern GUI Control Center (nLite Style Runner)
 echo   [1] Build Project
 echo   [2] Run Server (with Log Window)
 echo   [3] Run Server (silent)
@@ -20,11 +26,13 @@ echo   [7] Check Environment
 echo   [8] Kill All Processes (Force)
 echo   [9] Import Database (SQL)
 echo   [D] Portable MariaDB Controller
+echo   [X] Export Distribution Package (Protected Source)
 echo   [0] Exit
 echo.
 echo ========================================
 set /p choice="Select option: "
 
+if /I "%choice%"=="G" goto launch_gui
 if "%choice%"=="1" goto build
 if "%choice%"=="2" goto run_with_log
 if "%choice%"=="3" goto run_silent
@@ -35,6 +43,7 @@ if "%choice%"=="7" goto check
 if "%choice%"=="8" goto killall
 if "%choice%"=="9" goto import_db
 if /I "%choice%"=="D" goto mariadb
+if /I "%choice%"=="X" goto export_dist
 if "%choice%"=="0" goto end
 goto menu
 
@@ -447,6 +456,42 @@ goto menu
 
 :mariadb
 call "tools\_mariadb.bat"
+goto menu
+
+:launch_gui
+cls
+echo ========================================
+echo   Launching GUI Control Center...
+echo ========================================
+echo.
+if exist "SwordieLauncher.exe" (
+    echo [OK] Starting SwordieLauncher.exe...
+    start "" "SwordieLauncher.exe"
+    exit /b 0
+)
+if exist "launcher\SwordieLauncher.csproj" (
+    echo [*] SwordieLauncher.exe not compiled yet. Running via dotnet...
+    dotnet run --project launcher
+    goto menu
+)
+echo [ERROR] Cannot find SwordieLauncher.exe or launcher project!
+pause
+goto menu
+
+:export_dist
+cls
+echo ========================================
+echo   Export Distribution Package
+echo   (Protected Source - Omits src/)
+echo ========================================
+echo.
+if exist "SwordieLauncher.exe" (
+    echo Launching GUI Control Center in Distribution View...
+    start "" "SwordieLauncher.exe"
+    goto menu
+)
+echo [ERROR] SwordieLauncher.exe is required for distribution packaging.
+pause
 goto menu
 
 :end

@@ -17,14 +17,17 @@
 
 ```
 v232_Src_server/
+├── SwordieLauncher.exe          # GUI Control Center (หน้าตารันสไตล์ nLite Wizard)
 ├── server.bat                   # คอนโซลควบคุมระบบหลัก (Control Panel)
 ├── import_db.bat                # สคริปต์ลัดสำหรับนำเข้าฐานข้อมูล
+├── bgasset.jpg                  # รูปภาพพื้นหลัง Cyberpunk สำหรับตัวรัน GUI
 ├── README.md                    # เอกสารแนะนำและคู่มือการใช้งาน (เอกสารนี้)
 ├── AGENTS.md                    # กฎและมาตรฐานสำหรับ AI Agent ทุก Session
 ├── PROGRESS.md                  # บันทึกประวัติการพัฒนาและแก้ไข (แก้ไขครั้งที่ ....)
 ├── LICENSE.md                   # สัญญาอนุญาตการใช้งานซอฟต์แวร์
 ├── pom.xml                      # ไฟล์กำหนดโครงสร้างและ Dependency ของ Maven
 │
+├── launcher/                    # ซอร์สโค้ด GUI Launcher (.NET 10 WPF Desktop)
 ├── bin/                         # โฟลเดอร์ปลายทางของไฟล์คอมไพล์ (.class, .jar)
 ├── dat/                         # ข้อมูล Data Cache ของ WZ (Items, Maps, Skills ฯลฯ)
 ├── data/                        # โฟลเดอร์ข้อมูลรันไทม์
@@ -96,6 +99,7 @@ v232_Src_server/
 
 | ตัวเลือก | ฟังก์ชัน | คำอธิบาย |
 |:-------:|:--------|:---------|
+| **[G]** | Launch GUI Control Center | เปิดคอนโซลแบบกราฟิก (WPF Modern Glassmorphism สไตล์ nLite Wizard) |
 | **[1]** | Build Project | คอมไพล์ซอร์สโค้ดทั้งหมดด้วย Maven แบบออฟไลน์ |
 | **[2]** | Run Server (with Log Window) | สตาร์ทเซิร์ฟเวอร์พร้อมเปิดหน้าต่าง Live Log แบบเรียลไทม์ |
 | **[3]** | Run Server (silent) | สตาร์ทเซิร์ฟเวอร์ในหน้าต่างเดียว ไม่เปิดหน้าต่างเสริม |
@@ -106,6 +110,7 @@ v232_Src_server/
 | **[8]** | Kill All Processes (Force) | บังคับปิดโปรเซส Java และเซิร์ฟเวอร์ทั้งหมดทันที |
 | **[9]** | Import Database (SQL) | รันระบบนำเข้าฐานข้อมูลอัตโนมัติ |
 | **[D]** | Portable MariaDB Controller | แผงควบคุมเปิด-ปิด MariaDB แบบพกพา |
+| **[X]** | Export Distribution Package | สร้างชุดโฟลเดอร์สำหรับแจกจ่ายโดยตัดซอร์สโค้ดหลัก (`src/`) ออกเพื่อความปลอดภัย |
 | **[0]** | Exit | ออกจากแผงควบคุม |
 
 ---
