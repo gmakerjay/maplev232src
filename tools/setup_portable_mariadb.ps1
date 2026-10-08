@@ -1,6 +1,8 @@
 # PowerShell Script to Setup Portable MariaDB
 param(
-    [string]$Version = "10.11.8"
+    [string]$Version = "10.11.8",
+    [switch]$Force,
+    [switch]$NonInteractive
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,9 +21,15 @@ Write-Host ""
 
 if (Test-Path "$mariadbDir\bin\mysqld.exe") {
     Write-Host "[OK] Portable MariaDB is already installed at: $mariadbDir" -ForegroundColor Green
-    $reinstall = Read-Host "Do you want to re-download and reinstall? (y/N)"
-    if ($reinstall -notmatch "^[yY]") {
+    if ($Force) {
+        Write-Host "[*] Force reinstall requested." -ForegroundColor Yellow
+    } elseif ($NonInteractive) {
         exit 0
+    } else {
+        $reinstall = Read-Host "Do you want to re-download and reinstall? (y/N)"
+        if ($reinstall -notmatch "^[yY]") {
+            exit 0
+        }
     }
 }
 
@@ -102,21 +110,22 @@ sql_mode=NO_ENGINE_SUBSTITUTION
 "@
 
 $myIniPath = Join-Path $mariadbDir "my.ini"
-Set-Content -Path $myIniPath -Value $myIniContent -Encoding UTF8
+[System.IO.File]::WriteAllText($myIniPath, $myIniContent.Replace("`r`n", "`n"), (New-Object System.Text.UTF8Encoding($false)))
 Write-Host "[OK] Created: $myIniPath" -ForegroundColor Green
 Write-Host ""
 
 # 4. Initialize Database Directory if empty
 if (-not (Test-Path "$dataDir\mysql")) {
     Write-Host "[*] Initializing system database directory with mariadb-install-db..." -ForegroundColor Cyan
+    if (-not (Test-Path $dataDir)) {
+        New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+    }
     $installDbExe = Join-Path $mariadbDir "bin\mariadb-install-db.exe"
+    if (-not (Test-Path $installDbExe)) {
+        $installDbExe = Join-Path $mariadbDir "bin\mysql_install_db.exe"
+    }
     if (Test-Path $installDbExe) {
-        & $installDbExe "--datadir=$safeDataDir" "--defaults-file=$myIniPath"
-    } else {
-        $mysqlInstallDb = Join-Path $mariadbDir "bin\mysql_install_db.exe"
-        if (Test-Path $mysqlInstallDb) {
-            & $mysqlInstallDb "--datadir=$safeDataDir" "--defaults-file=$myIniPath"
-        }
+        & $installDbExe "--datadir=$dataDir" "--password=root"
     }
     Write-Host "[OK] System database initialized!" -ForegroundColor Green
 }
@@ -128,4 +137,6 @@ Write-Host "  Location: $mariadbDir" -ForegroundColor Green
 Write-Host "  Data:     $dataDir" -ForegroundColor Green
 Write-Host "=========================================" -ForegroundColor Green
 Write-Host ""
-Pause
+if (-not $NonInteractive) {
+    Pause
+}

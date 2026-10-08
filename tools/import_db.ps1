@@ -38,8 +38,10 @@ Write-Host ""
 
 # 1. Locate mysql.exe
 $mysqlPath = $null
+$portableMysql = Join-Path $projectRoot "libary\mariadb\bin\mysql.exe"
 
 $knownPaths = @(
+    $portableMysql,
     "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe",
     "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe",
     "C:\Program Files\MySQL\MySQL Server 8.1\bin\mysql.exe",

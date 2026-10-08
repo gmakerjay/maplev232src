@@ -55,7 +55,7 @@ if not exist "%MARIADB_DIR%\bin\mysqld.exe" (
 if not exist "%DATA_DIR%" mkdir "%DATA_DIR%"
 
 echo [*] Starting Portable MariaDB daemon on port 3306...
-start "Portable MariaDB Server" /min "%MARIADB_DIR%\bin\mysqld.exe" --defaults-file="%MY_INI%" --standalone
+start "Portable MariaDB Server" /min "%MARIADB_DIR%\bin\mysqld.exe" --defaults-file="%MY_INI%" --console
 
 :: Wait up to 10 seconds for port 3306 to listen
 set "STARTED=0"
@@ -65,7 +65,7 @@ for /l %%i in (1,1,10) do (
         set "STARTED=1"
         goto start_ok
     )
-    timeout /t 1 >nul
+    powershell -NoProfile -Command "Start-Sleep -Milliseconds 800" >nul 2>&1
 )
 
 :start_ok

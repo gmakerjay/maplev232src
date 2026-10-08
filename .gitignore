@@ -22,6 +22,7 @@ scratch/
 .agent/
 .agents/
 logs/
+data/
 bin/classes/headerText.txt
 bin/classes/decodeforlocal.txt
 bin/
