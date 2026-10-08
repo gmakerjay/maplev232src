@@ -17,6 +17,7 @@ libary/
 jdk/
 maven/
 target/
+dependency-reduced-pom.xml
 scratch/
 .venv/
 .agent/
