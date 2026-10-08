@@ -27,3 +27,23 @@
 - **ผลการทดสอบ / สถานะ**:
   - โครงสร้างโปรเจกต์สะอาดและเป็นระเบียบเรียบร้อย
   - ทดสอบสคริปต์และโฟลเดอร์พร้อมใช้งาน
+
+### แก้ไขครั้งที่ 2 — 2026-10-08
+- **ผู้รับผิดชอบ / Session**: Pair Programming AI Assistant (Portable MariaDB Integration & Test)
+- **รายการที่ทำ**:
+  - ทดสอบลบฐานข้อมูลเดิมออกจากเครื่อง และหยุดการทำงานของ MySQL Service เพื่อยืนยันระบบ Portable อิสระ
+  - ติดตั้งและตั้งค่า MariaDB แบบ Portable ลงใน `libary/mariadb` พร้อมไดเรกทอรีข้อมูล `data/db/`
+  - ปรับปรุง `tools/setup_portable_mariadb.ps1` ให้สร้าง `my.ini` แบบ UTF-8 (No BOM) และรองรับโหมดอัตโนมัติ
+  - ปรับปรุง `tools/_mariadb.bat` และ `tools/import_db.ps1` ให้ค้นพบและเรียกใช้งาน MariaDB แบบ Portable ก่อนเสมอ
+  - นำเข้าฐานข้อมูลเกมหลัก 10 ไฟล์เข้าสู่ Portable MariaDB สำเร็จครบ 90 ตาราง
+  - รันเซิร์ฟเวอร์เกมเชื่อมต่อฐานข้อมูล Portable สำเร็จ พร้อมเปิดรับพอร์ต 8484 (Login), 8585 (Channel), 8483 (API), 3000 (Web API)
+- **ไฟล์ที่สร้าง / แก้ไข / ลบ**:
+  - `tools/_mariadb.bat`
+  - `tools/setup_portable_mariadb.ps1`
+  - `tools/import_db.ps1`
+  - `.gitignore`
+  - `PROGRESS.md`
+- **ผลการทดสอบ / สถานะ**:
+  - Compile และ Build ผ่านเรียบร้อย
+  - Portable MariaDB และเซิร์ฟเวอร์เกมทดสอบรันสำเร็จสมบูรณ์
+
