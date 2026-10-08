@@ -156,7 +156,7 @@ public class MainForm : Form
         _cachedBgBitmap = bmp;
     }
 
-    public void DrawCanvasBackground(Control control, Graphics g, int overlayAlpha = 35, Color? tintColor = null)
+    public void DrawCanvasBackground(Control control, Graphics g, int overlayAlpha = 95, Color? tintColor = null)
     {
         if (_cachedBgBitmap == null)
         {
@@ -183,7 +183,7 @@ public class MainForm : Form
             {
                 Color overlayColor = tintColor.HasValue 
                     ? Color.FromArgb(overlayAlpha, tintColor.Value) 
-                    : Color.FromArgb(overlayAlpha, 10, 20, 35);
+                    : Color.FromArgb(overlayAlpha, 12, 22, 38);
                 using var brush = new SolidBrush(overlayColor);
                 g.FillRectangle(brush, destRect);
             }
@@ -343,7 +343,7 @@ public class MainForm : Form
         pnlFooter.Controls.Add(_btnExit);
 
         // 4. Left Sidebar Category Buttons (Classic nLite Block Buttons)
-        var pnlSidebar = new LunaCanvasPanel(this, 120, Color.FromArgb(236, 233, 216))
+        var pnlSidebar = new LunaCanvasPanel(this, 155, Color.FromArgb(236, 233, 216))
         {
             Dock = DockStyle.Left,
             Width = 150,
@@ -372,7 +372,7 @@ public class MainForm : Form
         pnlSidebar.Controls.Add(_btnCatCreate);
 
         // 5. Central Work Area Panel
-        _pnlContentArea = new LunaCanvasPanel(this, 35, Color.FromArgb(10, 20, 35))
+        _pnlContentArea = new LunaCanvasPanel(this, 95, Color.FromArgb(12, 22, 38))
         {
             Dock = DockStyle.Fill,
             Padding = new Padding(10)
@@ -418,7 +418,7 @@ public class MainForm : Form
     // ==========================================
     private void BuildTasksView()
     {
-        _viewTasks = new LunaCanvasPanel(this, 35, Color.FromArgb(10, 20, 35))
+        _viewTasks = new LunaCanvasPanel(this, 95, Color.FromArgb(12, 22, 38))
         {
             Dock = DockStyle.Fill,
             AutoScroll = true
@@ -518,7 +518,7 @@ public class MainForm : Form
     // ==========================================
     private void BuildConsoleView()
     {
-        _viewConsole = new LunaCanvasPanel(this, 40, Color.FromArgb(10, 20, 35))
+        _viewConsole = new LunaCanvasPanel(this, 100, Color.FromArgb(12, 22, 38))
         {
             Dock = DockStyle.Fill,
             Visible = false,
@@ -586,7 +586,7 @@ public class MainForm : Form
     // ==========================================
     private void BuildConfigView()
     {
-        _viewConfig = new LunaCanvasPanel(this, 40, Color.FromArgb(10, 20, 35))
+        _viewConfig = new LunaCanvasPanel(this, 100, Color.FromArgb(12, 22, 38))
         {
             Dock = DockStyle.Fill,
             AutoScroll = true,
@@ -674,7 +674,7 @@ public class MainForm : Form
     // ==========================================
     private void BuildDiagnosticsView()
     {
-        _viewDiagnostics = new LunaCanvasPanel(this, 40, Color.FromArgb(10, 20, 35))
+        _viewDiagnostics = new LunaCanvasPanel(this, 100, Color.FromArgb(12, 22, 38))
         {
             Dock = DockStyle.Fill,
             Visible = false,
@@ -724,7 +724,7 @@ public class MainForm : Form
     // ==========================================
     private void BuildDistributionView()
     {
-        _viewDistribution = new LunaCanvasPanel(this, 40, Color.FromArgb(10, 20, 35))
+        _viewDistribution = new LunaCanvasPanel(this, 100, Color.FromArgb(12, 22, 38))
         {
             Dock = DockStyle.Fill,
             Visible = false,
@@ -1122,7 +1122,7 @@ public class LunaCanvasPanel : Panel
     private readonly int _overlayAlpha;
     private readonly Color? _tintColor;
 
-    public LunaCanvasPanel(MainForm mainForm, int overlayAlpha = 35, Color? tintColor = null)
+    public LunaCanvasPanel(MainForm mainForm, int overlayAlpha = 95, Color? tintColor = null)
     {
         _mainForm = mainForm;
         _overlayAlpha = overlayAlpha;
