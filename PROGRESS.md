@@ -62,4 +62,18 @@
   - รัน `tools\_build.bat` ผ่านสมบูรณ์ (BUILD SUCCESS)
   - ทดสอบคำสั่ง `_mariadb.bat status` แสดงผลถูกต้องและตรวจสอบฐานข้อมูลแม่นยำ
 
+### แก้ไขครั้งที่ 4 — 2026-10-08
+- **ผู้รับผิดชอบ / Session**: Pair Programming AI Assistant (Port Listening Detection & Ini Optimization)
+- **รายการที่ทำ**:
+  - แก้ไขปัญหา Netstat Pipeline Detection ใน `tools/_mariadb.bat` และ `tools/_run.bat` ที่พบสถานะ TIME_WAIT แล้วเข้าใจผิดว่าพอร์ตกำลัง LISTEN โดยเปลี่ยนมาใช้คำสั่งตรวจสอบสถานะ Listen ที่แม่นยำ
+  - ตัดการสร้างไฟล์คอนฟิกซ้ำซ้อน `data/db/my.ini` ออก เพื่อให้ MariaDB อิงคอนฟิกหลักจาก `libary/mariadb/my.ini` เพียงจุดเดียว
+  - ทดสอบระบบเปิด-ปิด Portable MariaDB และคำสั่งตรวจสอบสถานะ (`_mariadb.bat status`) ให้รายงาน PID ถูกต้องแม่นยำ
+- **ไฟล์ที่สร้าง / แก้ไข / ลบ**:
+  - `tools/_mariadb.bat`
+  - `tools/_run.bat`
+  - `PROGRESS.md`
+- **ผลการทดสอบ / สถานะ**:
+  - ตรวจสอบ `_mariadb.bat status` แสดงสถานะ [OK] Database Server is ACTIVE on port 3306 และ [OK] Game Database: 'swordie232' is READY สมบูรณ์
+
+
 

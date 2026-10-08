@@ -29,7 +29,7 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":8484 :8483 :8585 :3000" ^| 
 )
 
 :: Check Database on Port 3306
-netstat -ano | findstr ":3306 " | findstr "LISTENING" >nul 2>&1
+powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >nul 2>&1
 if errorlevel 1 (
     if exist "%PROJECT_ROOT%\libary\mariadb\bin\mysqld.exe" (
         echo [*] Database port 3306 is not active. Auto-starting Portable MariaDB...

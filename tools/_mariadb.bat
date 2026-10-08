@@ -34,14 +34,6 @@ set "SAFE_DATA=!DATA_DIR:\=/!"
     echo innodb_log_file_size=64M
     echo sql_mode=NO_ENGINE_SUBSTITUTION
 ) > "%MY_INI%"
-if exist "%DATA_DIR%" (
-    (
-        echo [mysqld]
-        echo datadir=!SAFE_DATA!
-        echo [client]
-        echo plugin-dir=!SAFE_BASE!/lib/plugin
-    ) > "%DATA_DIR%\my.ini" 2>nul
-)
 exit /b 0
 
 :menu
@@ -68,7 +60,7 @@ goto menu
 :start
 echo.
 echo [*] Checking Database Port 3306...
-netstat -ano | findstr ":3306 " | findstr "LISTENING" >nul 2>&1
+powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >nul 2>&1
 if not errorlevel 1 (
     echo [OK] MySQL/MariaDB is ALREADY running on port 3306.
     call :check_swordie232
@@ -107,7 +99,7 @@ start "Portable MariaDB Server" /min "%MARIADB_DIR%\bin\mysqld.exe" --defaults-f
 :: Wait up to 10 seconds for port 3306 to listen
 set "STARTED=0"
 for /l %%i in (1,1,10) do (
-    netstat -ano | findstr ":3306 " | findstr "LISTENING" >nul 2>&1
+    powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >nul 2>&1
     if not errorlevel 1 (
         set "STARTED=1"
         goto start_ok
@@ -166,9 +158,9 @@ echo ========================================
 echo   MariaDB / Database Status
 echo ========================================
 echo.
-netstat -ano | findstr ":3306 " | findstr "LISTENING" >nul 2>&1
+powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >nul 2>&1
 if errorlevel 1 goto status_not_running
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":3306 " ^| findstr "LISTENING"') do (
+for /f "tokens=1" %%a in ('powershell -NoProfile -Command "(Get-NetTCPConnection -LocalPort 3306 -State Listen -ErrorAction SilentlyContinue).OwningProcess"') do (
     echo   [OK] Database Server is ACTIVE on port 3306 [PID: %%a]
 )
 goto status_check_files
